@@ -1,2 +1,2 @@
 # game of life
-~with gl~
+with gl
