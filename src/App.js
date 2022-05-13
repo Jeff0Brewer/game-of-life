@@ -8,21 +8,21 @@ const GameOfLife = () => {
   const canvasRef = useRef(null);
   const requestRef = useRef(null);
   const { height, width } = useWindowSize();
-  const pixelWidth = 600;  
+  const pixelWidth = 200;  
   const pixelHeight = Math.floor(pixelWidth*height/width);
 
   useEffect(() => {
     const glu = new GlUtil(); 
     const buffer = new Float32Array([-1, -1, 0, 0, 1, -1, 1, 0, -1, 1, 0, 1, 1, 1, 1, 1]); 
     const fsize = buffer.BYTES_PER_ELEMENT;
-    const frameTime = 1000/10;
+    const frameTime = 1000/1;
     const gl = glu.setupGl(canvasRef.current, shaders);
     const gameShader = 0; const screenShader = 1; const initShader = 2;
 
     glu.makeTextureFramebuffer(pixelWidth, pixelHeight) 
     glu.makeTextureFramebuffer(pixelWidth, pixelHeight)
     
-    glu.switchShader(0)
+    glu.switchShader(gameShader)
     const glBuffer = gl.createBuffer()
     gl.bindBuffer(gl.ARRAY_BUFFER, glBuffer)
     gl.bufferData(gl.ARRAY_BUFFER, buffer, gl.STATIC_DRAW)
@@ -34,6 +34,9 @@ const GameOfLife = () => {
     const aTexCoord = gl.getAttribLocation(gl.program, 'aTexCoord')
     gl.vertexAttribPointer(aTexCoord, 2, gl.FLOAT, false, fsize * 4, fsize * 2)
     gl.enableVertexAttribArray(aTexCoord)
+
+    gl.uniform1f(gl.getUniformLocation(gl.program, 'uWidth'), pixelWidth);
+    gl.uniform1f(gl.getUniformLocation(gl.program, 'uHeight'), pixelHeight);
 
     glu.switchShader(initShader);
     const initBuffer = gl.createBuffer()
