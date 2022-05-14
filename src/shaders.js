@@ -7,11 +7,31 @@ const shaders = [`
       vTexCoord = aTexCoord;
     }`, `
     precision highp float;
+    uniform float uWidth;
+    uniform float uHeight;
     uniform sampler2D uSampler;
     varying vec2 vTexCoord;
     
     void main(){
-      gl_FragColor = texture2D(uSampler, vTexCoord - vec2(0.0, 0.01));
+      float px = 1.0/uWidth;
+      float py = 1.0/uHeight;
+      float adj = 0.0;
+      adj += texture2D(uSampler, vTexCoord + vec2(px, 0.0)).x;
+      adj += texture2D(uSampler, vTexCoord + vec2(-px, 0.0)).x;
+      adj += texture2D(uSampler, vTexCoord + vec2(0.0, py)).x;
+      adj += texture2D(uSampler, vTexCoord + vec2(0.0, -py)).x;
+      adj += texture2D(uSampler, vTexCoord + vec2(px, py)).x;
+      adj += texture2D(uSampler, vTexCoord + vec2(-px, py)).x;
+      adj += texture2D(uSampler, vTexCoord + vec2(-px, -py)).x;
+      adj += texture2D(uSampler, vTexCoord + vec2(px, -py)).x;
+      gl_FragColor = texture2D(uSampler, vTexCoord);
+      float live = gl_FragColor.x;
+      if(live == 1.0 && (adj < 2.0 || adj > 3.0)){
+        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+      }
+      else if(live != 1.0 && adj == 3.0){
+        gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+      }
     }`,`
     attribute vec2 aPosition;
     attribute vec2 aTexCoord;
@@ -30,7 +50,7 @@ const shaders = [`
     attribute vec2 aPosition; 
     void main(){
         gl_Position = vec4(aPosition, 0.0, 1.0);
-        gl_PointSize = 20.0;
+        gl_PointSize = 3.0;
     }`,
     `
     precision highp float;
