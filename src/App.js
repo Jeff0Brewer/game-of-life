@@ -5,36 +5,37 @@ import shaders from './shaders'
 import './App.css';
 
 const GameOfLife = () => {
-  const canvasRef = useRef(null);
+  const domRef = useRef(null);
   const requestRef = useRef(null);
   const { height, width } = useWindowSize();
-  const pixelWidth = 200;  
-  const pixelHeight = Math.floor(pixelWidth*height/width);
-
-  useEffect(() => {
+  
+  useEffect(() => { 
+    const pixelWidth = 200;  
+    const pixelHeight = Math.floor(pixelWidth*height/width);
+    const canv = document.createElement('CANVAS');
+    canv.width = pixelWidth;
+    canv.height = pixelHeight;
+    domRef.current.appendChild(canv);
     const glu = new GlUtil(); 
     const buffer = new Float32Array([-1, -1, 0, 0, 1, -1, 1, 0, -1, 1, 0, 1, 1, 1, 1, 1]); 
     const fsize = buffer.BYTES_PER_ELEMENT;
     const frameTime = 1000/10;
-    const gl = glu.setupGl(canvasRef.current, shaders);
+    const gl = glu.setupGl(canv, shaders);
     const gameShader = 0; const screenShader = 1; const initShader = 2;
-
-    glu.makeTextureFramebuffer(pixelWidth, pixelHeight) 
-    glu.makeTextureFramebuffer(pixelWidth, pixelHeight)
+    
+    glu.makeTextureFramebuffer(pixelWidth, pixelHeight);
+    glu.makeTextureFramebuffer(pixelWidth, pixelHeight);
     
     glu.switchShader(gameShader)
     const glBuffer = gl.createBuffer()
     gl.bindBuffer(gl.ARRAY_BUFFER, glBuffer)
     gl.bufferData(gl.ARRAY_BUFFER, buffer, gl.STATIC_DRAW)
-
     const aPosition = gl.getAttribLocation(gl.program, 'aPosition')
     gl.vertexAttribPointer(aPosition, 2, gl.FLOAT, false, fsize * 4, 0)
     gl.enableVertexAttribArray(aPosition)
-
     const aTexCoord = gl.getAttribLocation(gl.program, 'aTexCoord')
     gl.vertexAttribPointer(aTexCoord, 2, gl.FLOAT, false, fsize * 4, fsize * 2)
     gl.enableVertexAttribArray(aTexCoord)
-
     gl.uniform1f(gl.getUniformLocation(gl.program, 'uWidth'), pixelWidth);
     gl.uniform1f(gl.getUniformLocation(gl.program, 'uHeight'), pixelHeight);
 
@@ -68,23 +69,23 @@ const GameOfLife = () => {
       const currTime = Date.now();
       if(currTime - lastTime > frameTime){
         lastTime = currTime;
-
         const fb0 = (fb1 % 2) + 1; 
         drawTex(gameShader, fb1, fb0);
         drawTex(screenShader, 0, fb1);
         fb1 = fb0;
       }
-
       requestRef.current = window.requestAnimationFrame(tick);
     }
     requestRef.current = window.requestAnimationFrame(tick);
+    
     return () => {
       window.cancelAnimationFrame(requestRef.current);
+      domRef.current.removeChild(canv);
     }
   }, [width, height]);
 
   return (
-    <canvas ref={canvasRef} width={pixelWidth} height={pixelHeight}></canvas>
+    <section ref={domRef}></section>
   ); 
 }
 
