@@ -40,8 +40,13 @@ const GameGL = props => {
     gl.uniform1f(gl.getUniformLocation(gl.program, 'uHeight'), pixelHeight);
 
     let initPoints = [];
-    for(let i = 0; i < 2000; i++){
-      initPoints.push(Math.floor((2*Math.random() - 1)*pixelWidth)/pixelWidth, Math.floor((2*Math.random() - 1)*pixelHeight)/pixelHeight);
+    
+    for(let x = -1; x <= 1; x += 1/pixelWidth){
+      for(let y = -1; y <= 1; y += 1/pixelHeight){
+        if(Math.random() <= .1){
+          initPoints.push(x, y);
+        }
+      }
     }
     glu.switchShader(initShader);
     const initBuffer = gl.createBuffer()
@@ -90,7 +95,7 @@ const GameGL = props => {
 }
 
 const GameOfLife = () => {
-  const defWidth = 300; const defFr = 10;
+  const defWidth = 200; const defFr = 10;
   const [pixelWidth, setPixelWidth] = useState(defWidth);
   const [framerate, setFramerate] = useState(defFr);
   
