@@ -1,16 +1,16 @@
-import React, {useRef, useEffect} from 'react'
+import React, {useState, useRef, useEffect} from 'react'
 import useWindowSize from './window-size'
 import { GlUtil } from './gl-util'
 import shaders from './shaders'
 import './App.css';
 
-const GameOfLife = () => {
+const GameGL = props => {
   const domRef = useRef(null);
   const requestRef = useRef(null);
   const { height, width } = useWindowSize();
   
   useEffect(() => { 
-    const pixelWidth = 200;  
+    const pixelWidth = props.width;  
     const pixelHeight = Math.floor(pixelWidth*height/width);
     const canv = document.createElement('CANVAS');
     canv.width = pixelWidth;
@@ -19,7 +19,7 @@ const GameOfLife = () => {
     const glu = new GlUtil(); 
     const buffer = new Float32Array([-1, -1, 0, 0, 1, -1, 1, 0, -1, 1, 0, 1, 1, 1, 1, 1]); 
     const fsize = buffer.BYTES_PER_ELEMENT;
-    const frameTime = 1000/10;
+    const frameTime = 1000/props.framerate;
     const gl = glu.setupGl(canv, shaders);
     const gameShader = 0; const screenShader = 1; const initShader = 2;
     
@@ -40,7 +40,7 @@ const GameOfLife = () => {
     gl.uniform1f(gl.getUniformLocation(gl.program, 'uHeight'), pixelHeight);
 
     let initPoints = [];
-    for(let i = 0; i < 1000; i++){
+    for(let i = 0; i < 2000; i++){
       initPoints.push(Math.floor((2*Math.random() - 1)*pixelWidth)/pixelWidth, Math.floor((2*Math.random() - 1)*pixelHeight)/pixelHeight);
     }
     glu.switchShader(initShader);
@@ -82,11 +82,35 @@ const GameOfLife = () => {
       window.cancelAnimationFrame(requestRef.current);
       domRef.current.removeChild(canv);
     }
-  }, [width, height]);
+  }, [width, height, props]);
 
   return (
     <section ref={domRef}></section>
   ); 
+}
+
+const GameOfLife = () => {
+  const defWidth = 300; const defFr = 10;
+  const [pixelWidth, setPixelWidth] = useState(defWidth);
+  const [framerate, setFramerate] = useState(defFr);
+  
+  return (
+    <section>
+      <nav className='controls'>
+        <div>
+          <label htmlFor='pwidth'>pixel width:</label>
+          <input id='pwidth' type={'text'} defaultValue={defWidth}
+          onChange={e => setPixelWidth(e.target.value)}></input>
+        </div>
+        <div>
+          <label htmlFor='frate'>framerate:</label>
+          <input id='frate' type={'text'} defaultValue={defFr}
+          onChange={e => setFramerate(e.target.value)}></input>
+        </div>
+      </nav>
+      <GameGL width={pixelWidth} framerate={framerate} />
+    </section>
+  );
 }
 
 const App = () => {
