@@ -15,7 +15,7 @@ const GameOfLife = () => {
     const glu = new GlUtil(); 
     const buffer = new Float32Array([-1, -1, 0, 0, 1, -1, 1, 0, -1, 1, 0, 1, 1, 1, 1, 1]); 
     const fsize = buffer.BYTES_PER_ELEMENT;
-    const frameTime = 1000/1;
+    const frameTime = 1000/10;
     const gl = glu.setupGl(canvasRef.current, shaders);
     const gameShader = 0; const screenShader = 1; const initShader = 2;
 
@@ -38,15 +38,19 @@ const GameOfLife = () => {
     gl.uniform1f(gl.getUniformLocation(gl.program, 'uWidth'), pixelWidth);
     gl.uniform1f(gl.getUniformLocation(gl.program, 'uHeight'), pixelHeight);
 
+    let initPoints = [];
+    for(let i = 0; i < 1000; i++){
+      initPoints.push(Math.floor((2*Math.random() - 1)*pixelWidth)/pixelWidth, Math.floor((2*Math.random() - 1)*pixelHeight)/pixelHeight);
+    }
     glu.switchShader(initShader);
     const initBuffer = gl.createBuffer()
     gl.bindBuffer(gl.ARRAY_BUFFER, initBuffer)
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0,0]), gl.STATIC_DRAW)
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(initPoints), gl.STATIC_DRAW)
     const iPosition = gl.getAttribLocation(gl.program, 'aPosition'); 
     gl.vertexAttribPointer(iPosition, 2, gl.FLOAT, false, fsize * 2, 0);
     gl.enableVertexAttribArray(iPosition);
     glu.switchFramebuffer(2, 0);
-    gl.drawArrays(gl.POINTS, 0, 1);
+    gl.drawArrays(gl.POINTS, 0, initPoints.length/2);
 
     const drawTex = (shaderInd, framebufferInd, textureInd) => {
       glu.switchFramebuffer(framebufferInd, textureInd);
@@ -77,7 +81,7 @@ const GameOfLife = () => {
     return () => {
       window.cancelAnimationFrame(requestRef.current);
     }
-  }, [pixelWidth, pixelHeight]);
+  }, [width, height]);
 
   return (
     <canvas ref={canvasRef} width={pixelWidth} height={pixelHeight}></canvas>
