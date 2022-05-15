@@ -37,7 +37,7 @@ const shaders = [`
     attribute vec2 aTexCoord;
     varying vec2 vTexCoord;
     void main(){
-      gl_Position = vec4(aPosition.xy, 0.0, 1.0);
+      gl_Position = vec4(aPosition, 0.0, 1.0);
       vTexCoord = aTexCoord;
     }`, `
     precision highp float;
@@ -49,16 +49,30 @@ const shaders = [`
     }`,`    
     attribute vec2 aPosition; 
     void main(){
-        gl_Position = vec4(aPosition, 0.0, 1.0);
-        gl_PointSize = 1.0;
+      gl_Position = vec4(aPosition, 0.0, 1.0);
+      gl_PointSize = 1.0;
     }`,
     `
     precision highp float;
-
     void main(){
-        vec2 cxy = 2.0 * gl_PointCoord - 1.0;
-        if(dot(cxy, cxy) > 1.0) discard;
-        gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+      gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+    }`,`
+    attribute vec2 aPosition;
+    uniform float uBrushSize;
+    void main(){
+      gl_Position = vec4(aPosition, 0.0, 1.0);
+      gl_PointSize = uBrushSize;
+    }`,`
+    precision highp float;
+    float rand(vec2 co){
+      return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+    }
+    void main(){
+      vec2 cxy = gl_PointCoord*2.0 - 1.0;
+      if(dot(cxy, cxy) > 1.0 || rand(cxy) > .2){
+        discard;
+      }
+      gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
     }`
 ]
 
